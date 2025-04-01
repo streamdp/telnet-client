@@ -43,16 +43,17 @@ var defaultBannerRe *regexp.Regexp = regexp.MustCompile(
 
 // TelnetClient is basic descriptor
 type TelnetClient struct {
-	Login     string
-	Password  string
-	Address   string
-	Port      string
-	Timeout   time.Duration
-	Verbose   bool
-	LogWriter *bufio.Writer
-	reader    *bufio.Reader
-	writer    *bufio.Writer
-	conn      net.Conn
+	Login       string
+	Password    string
+	Address     string
+	Port        string
+	ConnTimeout time.Duration
+	ReadTimeout time.Duration
+	Verbose     bool
+	LogWriter   *bufio.Writer
+	reader      *bufio.Reader
+	writer      *bufio.Writer
+	conn        net.Conn
 
 	Delimiter  byte
 	LoginRe    *regexp.Regexp
@@ -64,8 +65,8 @@ func (tc *TelnetClient) setDefaultParams() {
 	if tc.Port == "" {
 		tc.Port = "23"
 	}
-	if tc.Timeout == 0 {
-		tc.Timeout = 10 * time.Second
+	if tc.ReadTimeout == 0 {
+		tc.ReadTimeout = 10 * time.Second
 	}
 	if tc.Verbose && tc.LogWriter == nil {
 		tc.LogWriter = bufio.NewWriter(os.Stdout)
@@ -96,14 +97,18 @@ func (tc *TelnetClient) Dial() (err error) {
 	tc.setDefaultParams()
 
 	tc.log("Trying connect to %s:%s", tc.Address, tc.Port)
-	tc.conn, err = net.Dial("tcp", tc.Address+":"+tc.Port)
+	if tc.ConnTimeout > 0 {
+		tc.conn, err = net.DialTimeout("tcp", tc.Address+":"+tc.Port, tc.ConnTimeout)
+	} else {
+		tc.conn, err = net.Dial("tcp", tc.Address+":"+tc.Port)
+	}
 	if err != nil {
 		return
 	}
 
 	tc.reader = bufio.NewReader(tc.conn)
 	tc.writer = bufio.NewWriter(tc.conn)
-	err = tc.conn.SetReadDeadline(time.Now().Add(tc.Timeout))
+	err = tc.conn.SetReadDeadline(time.Now().Add(tc.ReadTimeout))
 	if err != nil {
 		return
 	}

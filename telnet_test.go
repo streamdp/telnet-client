@@ -31,7 +31,7 @@ func callWithTimeout(
 	select {
 	case _ = <-doneCh:
 		break
-	case <-time.After(tc.Timeout):
+	case <-time.After(tc.ReadTimeout):
 		expired = true
 		break
 	}
@@ -78,7 +78,7 @@ func (rc *testReadCase) run(
 }
 
 func Test_skipSBSequence(t *testing.T) {
-	tc := &TelnetClient{Timeout: 10 * time.Millisecond}
+	tc := &TelnetClient{ReadTimeout: 10 * time.Millisecond}
 	tests := []testReadCase{
 		{
 			name: "skipSBSequence: Just skip SB/SE sequence",
@@ -148,7 +148,7 @@ func Test_skipSBSequence(t *testing.T) {
 }
 
 func Test_skipCommand(t *testing.T) {
-	tc := &TelnetClient{Timeout: 10 * time.Millisecond}
+	tc := &TelnetClient{ReadTimeout: 10 * time.Millisecond}
 	tests := []testReadCase{
 		{
 			name: "skipCommand: Just skip SB/SE sequence",
@@ -200,7 +200,7 @@ func Test_skipCommand(t *testing.T) {
 }
 
 func Test_TelnetClient_ReadByte(t *testing.T) {
-	tc := &TelnetClient{Timeout: 10 * time.Millisecond}
+	tc := &TelnetClient{ReadTimeout: 10 * time.Millisecond}
 	tests := []testReadCase{
 		{
 			name: "ReadByte: Just byte",
@@ -240,7 +240,7 @@ func Test_TelnetClient_ReadByte(t *testing.T) {
 }
 
 func Test_TelnetClient_ReadUntil(t *testing.T) {
-	tc := &TelnetClient{Timeout: 10 * time.Millisecond}
+	tc := &TelnetClient{ReadTimeout: 10 * time.Millisecond}
 	tests := []testReadCase{
 		{
 			name: "ReadUntil: One package",
@@ -286,9 +286,9 @@ func Test_TelnetClient_ReadUntilPrompt(t *testing.T) {
 	}
 
 	tc := &TelnetClient{
-		Timeout:   10 * time.Millisecond,
-		Delimiter: defaultDelimiter,
-		LoginRe:   regexp.MustCompile("[\\w\\d-_]+ login:"),
+		ReadTimeout: 10 * time.Millisecond,
+		Delimiter:   defaultDelimiter,
+		LoginRe:     regexp.MustCompile("[\\w\\d-_]+ login:"),
 	}
 	tests := []testReadCase{
 		{
@@ -320,9 +320,9 @@ func Test_TelnetClient_ReadUntilPrompt(t *testing.T) {
 
 func Test_TelnetClient_ReadUntilBanner(t *testing.T) {
 	tc := &TelnetClient{
-		Timeout:   10 * time.Millisecond,
-		Delimiter: defaultDelimiter,
-		BannerRe:  defaultBannerRe,
+		ReadTimeout: 10 * time.Millisecond,
+		Delimiter:   defaultDelimiter,
+		BannerRe:    defaultBannerRe,
 	}
 	tests := []testReadCase{
 		{
@@ -352,9 +352,9 @@ func Test_TelnetClient_ReadUntilBanner(t *testing.T) {
 
 func Test_TelnetClient_waitWelcomeSigns(t *testing.T) {
 	tc := &TelnetClient{
-		Timeout:  10 * time.Millisecond,
-		Login:    "username",
-		Password: "P@ssw0rd",
+		ReadTimeout: 10 * time.Millisecond,
+		Login:       "username",
+		Password:    "P@ssw0rd",
 
 		Delimiter:  defaultDelimiter,
 		LoginRe:    defaultLoginRe,
@@ -421,7 +421,7 @@ func Test_TelnetClient_waitWelcomeSigns(t *testing.T) {
 		select {
 		case _ = <-doneCh:
 			break
-		case <-time.After(tc.Timeout):
+		case <-time.After(tc.ReadTimeout):
 			t.Errorf("waitWelcomeSigns: timeout is expired")
 		}
 	})
