@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/tanjmaxalb/telnet-client"
+	"github.com/streamdp/telnet-client"
 )
 
 func main() {
